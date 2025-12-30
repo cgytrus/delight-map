@@ -1,0 +1,30 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "CC-BY-NC-SA-4.0"
+issueTrackerURL = "https://github.com/cgytrus/delight-map/issues"
+
+[[mods]]
+modId = "delightmap"
+version = "${version}"
+displayName = "Delight-(down)map"
+authors = "ConfiG"
+description = '''
+Port of Delight-map by Enchanted_Games to older Minecraft versions.
+Icon by Enchanted_Games.
+'''
+credits = "Enchanted_Games for making Delight-map."
+logoFile = "assets/delightmap/icon.png"
+displayURL = "https://modrinth.com/delight-down-map"
+features = { javaVersion = "[21,)" }
+
+[[dependencies.delightmap]]
+modId = "neoforge"
+side = "CLIENT"
+
+[[dependencies.delightmap]]
+modId = "minecraft"
+versionRange = "[1.20.5,1.21.2)"
+side = "CLIENT"
+
+[[mixins]]
+config = "delightmap.mixins.json"

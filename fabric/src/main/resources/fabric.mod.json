@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "delightmap",
+  "version": "${version}",
+  "name": "Delight-(down)map",
+  "description": "Port of Delight-map by Enchanted_Games to older Minecraft versions.\nIcon by Enchanted_Games.",
+  "authors": [
+    {
+      "name": "ConfiG",
+      "contact": {
+        "homepage": "https://cgyt.ru"
+      }
+    }
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/delight-down-map",
+    "sources": "https://github.com/cgytrus/delightmap",
+    "issues": "https://github.com/cgytrus/delightmap/issues"
+  },
+  "license": "CC-BY-NC-SA-4.0",
+  "icon": "assets/delightmap/icon.png",
+  "environment": "client",
+  "mixins": [
+    "delightmap.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.4",
+    "minecraft": ">=1.20.5 <1.21.2",
+    "java": ">=21"
+  }
+}

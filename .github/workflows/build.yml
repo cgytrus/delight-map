@@ -1,0 +1,69 @@
+name: build
+
+on:
+  pull_request:
+  push:
+    branches: [ '**' ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        java: [ 21 ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v2
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Remove shadow JARs
+        run: |
+          rm fabric/build/libs/*-dev-shadow.jar
+          rm neoforge/build/libs/*-dev-shadow.jar
+
+      - uses: actions/upload-artifact@v4
+        name: Upload Fabric Build
+        id: upload-fabric
+        with:
+          name: delightmap-fabric
+          path: ./fabric/build/libs/*.jar
+
+      - uses: actions/upload-artifact@v4
+        name: Upload NeoForge Build
+        id: upload-neoforge
+        with:
+          name: delightmap-neoforge
+          path: ./neoforge/build/libs/*.jar
+
+      - name: Update Development Release
+        uses: andelf/nightly-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: dev
+          name: 'Development Release'
+          body: |
+            Delight-(down)map development release for commit ${{ github.sha }}.
+          files: |
+            ./fabric/build/libs/*.jar
+            ./neoforge/build/libs/*.jar
