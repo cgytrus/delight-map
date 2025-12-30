@@ -4,10 +4,23 @@ plugins {
     alias(libs.plugins.modpublish)
 }
 
+val versionsStr = findProperty("mod.minecraft") as String?
+val versions: List<String> = versionsStr
+    ?.split(",")
+    ?.map { it.trim() }
+    ?.filter { it.isNotEmpty() }
+    ?: emptyList()
+val versionRange = if (versions.size == 1) {
+    versions.first()
+}
+else {
+    "${versions.first()}-${versions.last()}"
+}
+
 val requiredJava = when {
-    stonecutter.current.parsed >= "1.20.6" -> JavaVersion.VERSION_21
-    stonecutter.current.parsed >= "1.18" -> JavaVersion.VERSION_17
-    stonecutter.current.parsed >= "1.17" -> JavaVersion.VERSION_16
+    stonecutter.eval(versions.first(), ">=1.20.5") -> JavaVersion.VERSION_21
+    stonecutter.eval(versions.first(), ">=1.18") -> JavaVersion.VERSION_17
+    stonecutter.eval(versions.first(), ">=1.17") -> JavaVersion.VERSION_16
     else -> JavaVersion.VERSION_1_8
 }
 
@@ -16,7 +29,6 @@ tasks.named<ProcessResources>("processResources") {
 
     val props = HashMap<String, String>().apply {
         this["version"] = prop("mod.version")
-        this["minecraft"] = "[%s,%s]".format(*prop("mod.minecraft").split('-').toTypedArray())
         this["java"] = "[${requiredJava},)"
     }
 
@@ -25,7 +37,7 @@ tasks.named<ProcessResources>("processResources") {
     }
 }
 
-version = "${property("mod.version")}+${property("mod.minecraft")}-neoforge"
+version = "${property("mod.version")}+$versionRange-neoforge"
 base.archivesName = property("mod.id") as String
 
 jsonlang {
@@ -98,8 +110,8 @@ publishMods {
     file = tasks.jar.map { it.archiveFile.get() }
 
     type = STABLE
-    displayName = "${property("mod.name")} v${property("mod.version")} for ${property("mod.minecraft")} Neoforge"
-    version = "${property("mod.version")}+${property("mod.minecraft")}-neoforge"
+    displayName = "${property("mod.name")} v${property("mod.version")} for $versionRange Neoforge"
+    version = "${property("mod.version")}+$versionRange-neoforge"
     modLoaders.add("neoforge")
 
     modrinth {

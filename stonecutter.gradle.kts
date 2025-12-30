@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.modpublish) apply false
 }
 
-stonecutter active "1.21.1-fabric"
+stonecutter active "1.16.5-fabric"
 
 stonecutter parameters {
     constants.match(node.metadata.project.substringAfterLast('-'), "fabric", "neoforge")

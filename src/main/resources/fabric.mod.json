@@ -23,8 +23,8 @@
   "mixins": [
     "delightmap.mixins.json"
   ],
+  "accessWidener": "delightmap.classtweaker",
   "depends": {
-    "minecraft": "${minecraft}",
     "java": "${java}"
   }
 }

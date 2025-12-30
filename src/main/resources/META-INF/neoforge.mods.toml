@@ -23,7 +23,6 @@ side = "CLIENT"
 
 [[dependencies.delightmap]]
 modId = "minecraft"
-versionRange = "${minecraft}"
 side = "CLIENT"
 
 [[mixins]]

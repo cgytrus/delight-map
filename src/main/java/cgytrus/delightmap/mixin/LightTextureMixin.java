@@ -7,12 +7,19 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.LivingEntity;
-import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.*;
+
+//? if <=1.19.2 {
+import com.mojang.math.Vector3f;
+//? } else {
+/*import org.joml.Vector3f;
+ *///? }
+
+//? if >1.18.2 {
+/*import net.minecraft.world.entity.LivingEntity;
+ *///? }
 
 @Mixin(LightTexture.class)
 public abstract class LightTextureMixin {
@@ -30,11 +37,13 @@ public abstract class LightTextureMixin {
     @Shadow
     private float blockLightRedFlicker;
 
-    @Shadow
+    //? if >1.18.2 {
+    /*@Shadow
     protected abstract float getDarknessGamma(float partialTick);
 
     @Shadow
     protected abstract float calculateDarknessScale(LivingEntity entity, float gamma, float partialTick);
+    *///? }
 
     @Shadow
     @Final
@@ -64,30 +73,32 @@ public abstract class LightTextureMixin {
 
         float skyDarken = level.getSkyDarken(1.0f);
 
-        float ambientLightFactor = level.dimensionType().ambientLight();
+        float ambientLightFactor = level.dimensionType().ambientLight/*? >1.18.2 >> ';'*//*()*/;
         float skyFactor = level.getSkyFlashTime() > 0 ? 1.0f : skyDarken * 0.95f + 0.05f;
         boolean useBrightLightmap = level.effects().forceBrightLightmap();
         float blockFactor = useBrightLightmap ? 1.4f : (this.blockLightRedFlicker + 1.5f);
         float nightVisionFactor = 0.0f;
-        Vector3f skyLightColor = new Vector3f(skyDarken, skyDarken, 1.0f).lerp(new Vector3f(1.0f), 0.35f);
-        float darknessScale;
+        Vector3f skyLightColor = new Vector3f(skyDarken, skyDarken, 1.0f);
+        skyLightColor.lerp(new Vector3f(1.0f, 1.0f, 1.0f), 0.35f);
         float darkenWorldFactor = Math.max(0.0f, this.renderer.getDarkenWorldAmount(partialTicks));
-        float brightnessFactor;
 
         float waterVision = player.getWaterVision();
         if (player.hasEffect(MobEffects.NIGHT_VISION)) {
             nightVisionFactor = GameRenderer.getNightVisionScale(player, partialTicks);
         }
-        else if (waterVision > 0.0F && player.hasEffect(MobEffects.CONDUIT_POWER)) {
+        else if (waterVision > 0.0f && player.hasEffect(MobEffects.CONDUIT_POWER)) {
             nightVisionFactor = waterVision;
         }
         nightVisionFactor = Math.max(0.0f, nightVisionFactor);
 
-        float darknessEffectScale = this.minecraft.options.darknessEffectScale().get().floatValue();
+        //? if <=1.18.2 {
+        float brightnessFactor = Math.max(0.0f, (float)this.minecraft.options.gamma);
+        //? } else {
+        /*float darknessEffectScale = this.minecraft.options.darknessEffectScale().get().floatValue();
         float scaledDarknessGamma = this.getDarknessGamma(partialTicks) * darknessEffectScale;
-        darknessScale = this.calculateDarknessScale(player, scaledDarknessGamma, partialTicks) * darknessEffectScale;
-
-        brightnessFactor = Math.max(0.0f, this.minecraft.options.gamma().get().floatValue() - scaledDarknessGamma);
+        float darknessScale = this.calculateDarknessScale(player, scaledDarknessGamma, partialTicks) * darknessEffectScale;
+        float brightnessFactor = Math.max(0.0f, this.minecraft.options.gamma().get().floatValue() - scaledDarknessGamma);
+        *///? }
 
         Vector3f color = new Vector3f();
         Vector3f temp = new Vector3f();
@@ -105,16 +116,16 @@ public abstract class LightTextureMixin {
                 if (useBrightLightmap) {
                     float adjustedBlockBrightness = Mth.clamp(blockBrightness - 0.2f, 0.05f, 0.7f);
                     color.set(
-                        adjustedBlockBrightness * Math.fma(adjustedBlockBrightness * adjustedBlockBrightness, 0.2f, 0.8f) - 0.03f,
-                        adjustedBlockBrightness * Math.fma(adjustedBlockBrightness, 0.2f, 0.8f),
+                        adjustedBlockBrightness * (adjustedBlockBrightness * adjustedBlockBrightness * 0.2f + 0.8f) - 0.03f,
+                        adjustedBlockBrightness * (adjustedBlockBrightness * 0.2f + 0.8f),
                         adjustedBlockBrightness
                     );
                 }
                 else {
                     color.set(
                         blockBrightness,
-                        blockBrightness * Math.fma(blockBrightness * blockBrightness, 0.39f, 0.61f),
-                        blockBrightness * Math.fma(blockBrightness * blockBrightness, 0.88f, 0.12f)
+                        blockBrightness * (blockBrightness * blockBrightness * 0.39f + 0.61f),
+                        blockBrightness * (blockBrightness * blockBrightness * 0.88f + 0.12f)
                     );
                 }
 
@@ -123,48 +134,57 @@ public abstract class LightTextureMixin {
                 }
                 else {
                     color.add(
-                        skyLightColor.x * skyBrightness * Math.fma(skyBrightness * skyBrightness, 0.25f, 0.75f),
-                        skyLightColor.y * skyBrightness * Math.fma(skyBrightness * skyBrightness, 0.2f, 0.8f),
-                        skyLightColor.z * skyBrightness
+                        skyLightColor.x() * skyBrightness * (skyBrightness * skyBrightness * 0.25f + 0.75f),
+                        skyLightColor.y() * skyBrightness * (skyBrightness * skyBrightness * 0.2f + 0.8f),
+                        skyLightColor.z() * skyBrightness
                     );
                 }
 
-                Vector3f darkenedColor = temp.set(color).mul(0.7f, 0.6f, 0.6f);
-                color.lerp(darkenedColor, darkenWorldFactor);
+                temp.set(color.x() * 0.7f, color.y() * 0.6f, color.z() * 0.6f);
+                color.lerp(temp, darkenWorldFactor);
 
                 // adjust for night vision effect
                 if (nightVisionFactor > 0.0f) {
-                    Vector3f one = temp.set(1.0f);
-                    color.lerp(one, nightVisionFactor);
+                    temp.set(1.0f, 1.0f, 1.0f);
+                    color.lerp(temp, nightVisionFactor);
                 }
-                // adjust for darkness effect
+                //? if >1.18.2 {
+                /*// adjust for darkness effect
                 if (darknessScale > 0.0f) {
-                    color.sub(temp.set(Math.min(0.9f, darknessScale)));
-                    color.x = Mth.clamp(color.x, 0.0f, 1.0f);
-                    color.y = Mth.clamp(color.y, 0.0f, 1.0f);
-                    color.z = Mth.clamp(color.z, 0.0f, 1.0f);
+                    float limitedDarknessScale = -Math.min(0.9f, darknessScale);
+                    color.add(limitedDarknessScale, limitedDarknessScale, limitedDarknessScale);
+                    color.set(
+                        Mth.clamp(color.x(), 0.0f, 1.0f),
+                        Mth.clamp(color.y(), 0.0f, 1.0f),
+                        Mth.clamp(color.z(), 0.0f, 1.0f)
+                    );
                 }
+                *///? }
 
                 // adjust for brightness setting
+                float brightnessAdjustment;
                 if (useBrightLightmap) {
-                    color.add(temp.set((brightnessFactor * (brightnessFactor / 1.7f) - 0.3f) / 4.0f));
+                    brightnessAdjustment = (brightnessFactor * (brightnessFactor / 1.7f) - 0.3f) / 4.0f;
                 }
                 else {
-                    color.add(temp.set((brightnessFactor - 0.2f) / 4.0f));
+                    brightnessAdjustment = (brightnessFactor - 0.2f) / 4.0f;
                 }
+                color.add(brightnessAdjustment, brightnessAdjustment, brightnessAdjustment);
 
-                color.x = Mth.clamp(color.x, 0.0f, 1.0f);
-                color.y = Mth.clamp(color.y, 0.0f, 1.0f);
-                color.z = Mth.clamp(color.z, 0.0f, 1.0f);
+                color.set(
+                    Mth.clamp(color.x(), 0.0f, 1.0f),
+                    Mth.clamp(color.y(), 0.0f, 1.0f),
+                    Mth.clamp(color.z(), 0.0f, 1.0f)
+                );
                 color.mul(255.0f);
-                int r = (int)color.x;
-                int g = (int)color.y;
-                int b = (int)color.z;
-                this.lightPixels.setPixelRGBA(x, y, FastColor.ABGR32.color(255, b, g, r));
+                int r = (int)color.x();
+                int g = (int)color.y();
+                int b = (int)color.z();
+                this.lightPixels.setPixelRGBA(x, y, 255 << 24 | b << 16 | g << 8 | r);
             }
         }
 
-        this.lightPixels.setPixelRGBA(15, 15, FastColor.ABGR32.color(255, 255, 255, 255));
+        this.lightPixels.setPixelRGBA(15, 15, 255 << 24 | 255 << 16 | 255 << 8 | 255);
 
         this.lightTexture.upload();
         this.minecraft.getProfiler().pop();

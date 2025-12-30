@@ -22,6 +22,10 @@ stonecutter {
             .forEach { version("$mc-$it", mc).buildscript = "build.$it.gradle.kts" }
 
         match("1.21.1", "fabric", "neoforge")
+        match("1.20.4", "fabric", "neoforge")
+        match("1.19.2", "fabric")
+        match("1.18.2", "fabric")
+        match("1.16.5", "fabric")
 
         vcsVersion = "1.21.1-fabric"
     }
