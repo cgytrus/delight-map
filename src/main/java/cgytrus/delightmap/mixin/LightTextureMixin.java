@@ -2,13 +2,13 @@ package cgytrus.delightmap.mixin;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.*;
 
 //? if <=1.19.2 {
@@ -34,8 +34,13 @@ public abstract class LightTextureMixin {
     @Final
     private DynamicTexture lightTexture;
 
-    @Shadow
+    //? if >1.14.4 {
+    /*@Shadow
     private float blockLightRedFlicker;
+    *///? } else {
+    @Shadow
+    private float blockLightRed;
+    //? }
 
     //? if >1.18.2 {
     /*@Shadow
@@ -62,8 +67,14 @@ public abstract class LightTextureMixin {
         if (!this.updateLightTexture)
             return;
 
-        ClientLevel level = this.minecraft.level;
+        //? if >1.14.4 {
+        /*net.minecraft.client.multiplayer.ClientLevel level = this.minecraft.level;
+        *///? } else {
+        net.minecraft.client.multiplayer.MultiPlayerLevel level = this.minecraft.level;
+        //? }
+
         LocalPlayer player = this.minecraft.player;
+
         if (level == null || player == null)
             return;
 
@@ -73,18 +84,47 @@ public abstract class LightTextureMixin {
 
         float skyDarken = level.getSkyDarken(1.0f);
 
-        float ambientLightFactor = level.dimensionType().ambientLight/*? >1.18.2 >> ';'*//*()*/;
+        //? if >1.18.2 {
+        /*float ambientLightFactor = level.dimensionType().ambientLight();
+        *///? } else if >1.15.2 {
+        /*float ambientLightFactor = level.dimensionType().brightness(0);
+        *///? } else if >1.14.4 {
+        /*float ambientLightFactor = level.getDimension().getBrightness(0);
+        *///? } else {
+        float ambientLightFactor = level.getDimension().getBrightnessRamp()[0];
+        //? }
+
+        //? if >1.15.2 {
+        /*boolean useBrightLightmap = level.effects().forceBrightLightmap();
+        *///? } else {
+        boolean useBrightLightmap = level.dimension.getType() == DimensionType.THE_END;
+        //? }
+
+        //? if >1.14.4 {
+        /*float blockLightRedFlicker = this.blockLightRedFlicker;
+        *///? } else {
+        float blockLightRedFlicker = this.blockLightRed * 0.1f;
+        //? }
+
         float skyFactor = level.getSkyFlashTime() > 0 ? 1.0f : skyDarken * 0.95f + 0.05f;
-        boolean useBrightLightmap = level.effects().forceBrightLightmap();
-        float blockFactor = useBrightLightmap ? 1.4f : (this.blockLightRedFlicker + 1.5f);
+        float blockFactor = useBrightLightmap ? 1.4f : (blockLightRedFlicker + 1.5f);
         float nightVisionFactor = 0.0f;
-        Vector3f skyLightColor = new Vector3f(skyDarken, skyDarken, 1.0f);
-        skyLightColor.lerp(new Vector3f(1.0f, 1.0f, 1.0f), 0.35f);
         float darkenWorldFactor = Math.max(0.0f, this.renderer.getDarkenWorldAmount(partialTicks));
+
+        float skyLightBrightness = Mth.lerp(0.35f, skyDarken, 1.0f);
+        Vector3f skyLightColor = new Vector3f(
+            skyLightBrightness,
+            skyLightBrightness,
+            1.0f
+        );
 
         float waterVision = player.getWaterVision();
         if (player.hasEffect(MobEffects.NIGHT_VISION)) {
-            nightVisionFactor = GameRenderer.getNightVisionScale(player, partialTicks);
+            //? if >1.14.4 {
+            /*nightVisionFactor = GameRenderer.getNightVisionScale(player, partialTicks);
+            *///? } else {
+            nightVisionFactor = this.renderer.getNightVisionScale(player, partialTicks);
+            //? }
         }
         else if (waterVision > 0.0f && player.hasEffect(MobEffects.CONDUIT_POWER)) {
             nightVisionFactor = waterVision;
@@ -101,7 +141,6 @@ public abstract class LightTextureMixin {
         *///? }
 
         Vector3f color = new Vector3f();
-        Vector3f temp = new Vector3f();
         for(int y = 0; y < 16; ++y) {
             for (int x = 0; x < 16; ++x) {
                 float blockLevel = (x + 0.5f) / 16.0f;
@@ -140,13 +179,19 @@ public abstract class LightTextureMixin {
                     );
                 }
 
-                temp.set(color.x() * 0.7f, color.y() * 0.6f, color.z() * 0.6f);
-                color.lerp(temp, darkenWorldFactor);
+                color.set(
+                    Mth.lerp(darkenWorldFactor, color.x(), color.x() * 0.7f),
+                    Mth.lerp(darkenWorldFactor, color.y(), color.y() * 0.6f),
+                    Mth.lerp(darkenWorldFactor, color.z(), color.z() * 0.6f)
+                );
 
                 // adjust for night vision effect
                 if (nightVisionFactor > 0.0f) {
-                    temp.set(1.0f, 1.0f, 1.0f);
-                    color.lerp(temp, nightVisionFactor);
+                    color.set(
+                        Mth.lerp(nightVisionFactor, color.x(), 1.0f),
+                        Mth.lerp(nightVisionFactor, color.y(), 1.0f),
+                        Mth.lerp(nightVisionFactor, color.z(), 1.0f)
+                    );
                 }
                 //? if >1.18.2 {
                 /*// adjust for darkness effect
