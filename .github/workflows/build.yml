@@ -55,15 +55,15 @@ jobs:
           name: delightmap-neoforge
           path: ./neoforge/build/libs/*.jar
 
-      - name: Update Development Release
-        uses: andelf/nightly-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: dev
-          name: 'Development Release'
-          body: |
-            Delight-(down)map development release for commit ${{ github.sha }}.
-          files: |
-            ./fabric/build/libs/*.jar
-            ./neoforge/build/libs/*.jar
+      #- name: Update Development Release
+      #  uses: andelf/nightly-release@v1
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #  with:
+      #    tag_name: dev
+      #    name: 'Development Release'
+      #    body: |
+      #      Delight-(down)map development release for commit ${{ github.sha }}.
+      #    files: |
+      #      ./fabric/build/libs/*.jar
+      #      ./neoforge/build/libs/*.jar
