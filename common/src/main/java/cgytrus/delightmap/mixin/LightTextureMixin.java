@@ -123,11 +123,10 @@ public abstract class LightTextureMixin {
                 }
                 else {
                     color.add(
-                        skyBrightness * Math.fma(skyBrightness * skyBrightness, 0.25f, 0.75f),
-                        skyBrightness * Math.fma(skyBrightness * skyBrightness, 0.2f, 0.8f),
-                        skyBrightness
+                        skyLightColor.x * skyBrightness * Math.fma(skyBrightness * skyBrightness, 0.25f, 0.75f),
+                        skyLightColor.y * skyBrightness * Math.fma(skyBrightness * skyBrightness, 0.2f, 0.8f),
+                        skyLightColor.z * skyBrightness
                     );
-                    color.mul(skyLightColor);
                 }
 
                 Vector3f darkenedColor = temp.set(color).mul(0.7f, 0.6f, 0.6f);
