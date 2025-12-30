@@ -1,5 +1,6 @@
 ﻿# Delight-(down)map
 Port of [Delight-map](https://modrinth.com/resourcepack/delight-map) by Enchanted_Games to Minecraft versions older than 1.21.2.
+Please, report all issues while using this mod here, not to the resource pack developer!
 
 Currently supports 1.20.5 to 1.21.1.
 

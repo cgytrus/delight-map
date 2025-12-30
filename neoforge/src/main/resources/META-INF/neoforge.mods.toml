@@ -14,7 +14,7 @@ Icon by Enchanted_Games.
 '''
 credits = "Enchanted_Games for making Delight-map."
 logoFile = "assets/delightmap/icon.png"
-displayURL = "https://modrinth.com/delight-down-map"
+displayURL = "https://modrinth.com/mod/delight-down-map"
 features = { javaVersion = "[21,)" }
 
 [[dependencies.delightmap]]
