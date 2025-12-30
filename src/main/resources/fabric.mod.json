@@ -18,14 +18,13 @@
     "issues": "https://github.com/cgytrus/delightmap/issues"
   },
   "license": "CC-BY-NC-SA-4.0",
-  "icon": "assets/delightmap/icon.png",
+  "icon": "assets/icon.png",
   "environment": "client",
   "mixins": [
     "delightmap.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.18.4",
-    "minecraft": ">=1.20.5 <1.21.2",
-    "java": ">=21"
+    "minecraft": "${minecraft}",
+    "java": "${java}"
   }
 }

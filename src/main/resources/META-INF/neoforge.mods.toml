@@ -13,9 +13,9 @@ Port of Delight-map by Enchanted_Games to older Minecraft versions.
 Icon by Enchanted_Games.
 '''
 credits = "Enchanted_Games for making Delight-map."
-logoFile = "assets/delightmap/icon.png"
+logoFile = "assets/icon.png"
 displayURL = "https://modrinth.com/mod/delight-down-map"
-features = { javaVersion = "[21,)" }
+features = { javaVersion = "${java}" }
 
 [[dependencies.delightmap]]
 modId = "neoforge"
@@ -23,7 +23,7 @@ side = "CLIENT"
 
 [[dependencies.delightmap]]
 modId = "minecraft"
-versionRange = "[1.20.5,1.21.2)"
+versionRange = "${minecraft}"
 side = "CLIENT"
 
 [[mixins]]
