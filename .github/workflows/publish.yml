@@ -1,15 +1,11 @@
-name: Build
+name: Publish
 
 on:
-  pull_request:
-  push:
-    branches:
-    - '**'              # every branch
-    - '!no-build-**'    # unless marked as no-build
+  workflow_dispatch:
 
 jobs:
-  build:
-    name: Build
+  publish:
+    name: Publish
     runs-on: ubuntu-latest
 
     steps:
@@ -40,21 +36,8 @@ jobs:
       - name: Build
         run: ./gradlew buildAndCollect
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        id: upload-artifacts
-        with:
-          name: delightmap
-          path: ./build/libs/*/*.jar
-
-      - name: Update Development Release
-        uses: andelf/nightly-release@v1
+      - name: Publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: dev
-          name: 'Development Release'
-          body: |
-            Delight-(down)map development release for commit ${{ github.sha }}.
-          files: ./build/libs/*/*.jar
-        if: github.ref == 'refs/heads/main'
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+        run: ./gradlew publishMods

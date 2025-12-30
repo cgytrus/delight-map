@@ -1,6 +1,4 @@
 [plugins]
-dotenv = { id = "co.uzzu.dotenv.gradle", version = "4.0.0" }
-
 jsonlang = { id = "dev.kikugie.postprocess.jsonlang", version = "2.1-beta.4" }
 modpublish = { id = "me.modmuss50.mod-publish-plugin", version = "1.1.0" }
 

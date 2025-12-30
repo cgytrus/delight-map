@@ -105,15 +105,14 @@ publishMods {
 
     modrinth {
         projectId = property("publish.modrinth") as String
-        accessToken = env.MODRINTH_API_KEY.orNull()
-        minecraftVersions.add(stonecutter.current.version)
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         minecraftVersions.addAll(additionalVersions)
     }
 
-    curseforge {
-        projectId = property("publish.curseforge") as String
-        accessToken = env.CURSEFORGE_API_KEY.orNull()
-        minecraftVersions.add(stonecutter.current.version)
-        minecraftVersions.addAll(additionalVersions)
+    github {
+        accessToken = providers.environmentVariable("GITHUB_TOKEN")
+        repository = "cgytrus/delight-map"
+        commitish = "main"
+        tagName = "v${property("mod.version")}"
     }
 }
