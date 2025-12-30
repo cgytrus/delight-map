@@ -56,7 +56,5 @@ jobs:
           name: 'Development Release'
           body: |
             Delight-(down)map development release for commit ${{ github.sha }}.
-          files: |
-            ./fabric/build/libs/*.jar
-            ./neoforge/build/libs/*.jar
+          files: ./build/libs/*/*.jar
         if: github.ref == 'refs/heads/main'
