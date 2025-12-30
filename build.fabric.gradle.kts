@@ -109,6 +109,7 @@ publishMods {
     type = STABLE
     displayName = "${property("mod.name")} v${property("mod.version")} for $versionRange Fabric"
     version = "${property("mod.version")}+$versionRange-fabric"
+    changelog = provider { rootProject.file("CHANGELOG.md").readText() }
     modLoaders.add("fabric")
 
     modrinth {

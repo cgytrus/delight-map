@@ -101,6 +101,7 @@ publishMods {
     type = STABLE
     displayName = "${property("mod.name")} v${property("mod.version")} for $versionRange Neoforge"
     version = "${property("mod.version")}+$versionRange-neoforge"
+    changelog = provider { rootProject.file("CHANGELOG.md").readText() }
     modLoaders.add("neoforge")
 
     modrinth {
