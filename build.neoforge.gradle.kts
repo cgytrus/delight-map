@@ -45,20 +45,9 @@ jsonlang {
     prettyPrint = true
 }
 
-repositories {
-    maven("https://maven.parchmentmc.org") { name = "ParchmentMC" }
-}
-
 neoForge {
     version = property("deps.neoforge") as String
     validateAccessTransformers = true
-
-    if (hasProperty("deps.parchment")) {
-        parchment {
-            mappingsVersion = property("deps.parchment") as String
-            minecraftVersion = stonecutter.current.version
-        }
-    }
 
     runs {
         register("client") {
@@ -78,7 +67,7 @@ neoForge {
 
 tasks {
     processResources {
-        exclude("**/fabric.mod.json", "**/*.accesswidener", "**/mods.toml")
+        exclude("**/fabric.mod.json", "**/*.classtweaker", "**/mods.toml")
     }
 
     named("createMinecraftArtifacts") {

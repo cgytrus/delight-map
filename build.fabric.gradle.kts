@@ -58,15 +58,12 @@ jsonlang {
 
 repositories {
     mavenLocal()
-    maven("https://maven.parchmentmc.org") { name = "ParchmentMC" }
 }
 
 dependencies {
     minecraft("com.mojang:minecraft:${stonecutter.current.version}")
     mappings(loom.layered {
         officialMojangMappings()
-        if (hasProperty("deps.parchment"))
-            parchment("org.parchmentmc.data:parchment-${stonecutter.current.version}:${property("deps.parchment")}@zip")
     })
     modImplementation("net.fabricmc:fabric-loader:${property("deps.fabric-loader")}")
 }
