@@ -4,23 +4,12 @@ plugins {
     alias(libs.plugins.modpublish)
 }
 
-val versionsStr = findProperty("mod.minecraft") as String?
-val versions: List<String> = versionsStr
-    ?.split(",")
-    ?.map { it.trim() }
-    ?.filter { it.isNotEmpty() }
-    ?: emptyList()
-val versionRange = if (versions.size == 1) {
-    versions.first()
-}
-else {
-    "${versions.first()}-${versions.last()}"
-}
+val (minVersion, maxVersion) = (property("mod.minecraft") as String).split('-')
 
 val requiredJava = when {
-    stonecutter.eval(versions.first(), ">=1.20.5") -> JavaVersion.VERSION_21
-    stonecutter.eval(versions.first(), ">=1.18") -> JavaVersion.VERSION_17
-    stonecutter.eval(versions.first(), ">=1.17") -> JavaVersion.VERSION_16
+    stonecutter.eval(minVersion, ">=1.20.5") -> JavaVersion.VERSION_21
+    stonecutter.eval(minVersion, ">=1.18") -> JavaVersion.VERSION_17
+    stonecutter.eval(minVersion, ">=1.17") -> JavaVersion.VERSION_16
     else -> JavaVersion.VERSION_1_8
 }
 
@@ -37,7 +26,7 @@ tasks.named<ProcessResources>("processResources") {
     }
 }
 
-version = "${property("mod.version")}+$versionRange-neoforge"
+version = "${property("mod.version")}+${property("mod.minecraft")}-neoforge"
 base.archivesName = property("mod.id") as String
 
 jsonlang {
@@ -83,30 +72,25 @@ tasks {
 }
 
 java {
-    //withSourcesJar()
     sourceCompatibility = requiredJava
     targetCompatibility = requiredJava
 }
-
-val additionalVersionsStr = findProperty("publish.versions") as String?
-val additionalVersions: List<String> = additionalVersionsStr
-    ?.split(",")
-    ?.map { it.trim() }
-    ?.filter { it.isNotEmpty() }
-    ?: emptyList()
 
 publishMods {
     file = tasks.jar.map { it.archiveFile.get() }
 
     type = STABLE
-    displayName = "${property("mod.name")} v${property("mod.version")} for $versionRange Neoforge"
-    version = "${property("mod.version")}+$versionRange-neoforge"
+    displayName = "${property("mod.name")} v${property("mod.version")} for ${property("mod.minecraft")} Neoforge"
+    version = "${property("mod.version")}+${property("mod.minecraft")}-neoforge"
     changelog = provider { rootProject.file("CHANGELOG.md").readText() }
     modLoaders.add("neoforge")
 
     modrinth {
         projectId = property("publish.modrinth") as String
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
-        minecraftVersions.addAll(additionalVersions)
+        minecraftVersionRange {
+            start = minVersion
+            end = maxVersion
+        }
     }
 }

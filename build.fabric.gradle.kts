@@ -1,6 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 import org.gradle.kotlin.dsl.register
+import kotlin.collections.component1
 
 plugins {
     alias(libs.plugins.fabric.loom)
@@ -8,23 +9,12 @@ plugins {
     alias(libs.plugins.modpublish)
 }
 
-val versionsStr = findProperty("mod.minecraft") as String?
-val versions: List<String> = versionsStr
-    ?.split(",")
-    ?.map { it.trim() }
-    ?.filter { it.isNotEmpty() }
-    ?: emptyList()
-val versionRange = if (versions.size == 1) {
-    versions.first()
-}
-else {
-    "${versions.first()}-${versions.last()}"
-}
+val (minVersion, maxVersion) = (property("mod.minecraft") as String).split('-')
 
 val requiredJava = when {
-    stonecutter.eval(versions.first(), ">=1.20.5") -> JavaVersion.VERSION_21
-    stonecutter.eval(versions.first(), ">=1.18") -> JavaVersion.VERSION_17
-    stonecutter.eval(versions.first(), ">=1.17") -> JavaVersion.VERSION_16
+    stonecutter.eval(minVersion, ">=1.20.5") -> JavaVersion.VERSION_21
+    stonecutter.eval(minVersion, ">=1.18") -> JavaVersion.VERSION_17
+    stonecutter.eval(minVersion, ">=1.17") -> JavaVersion.VERSION_16
     else -> JavaVersion.VERSION_1_8
 }
 
@@ -48,7 +38,7 @@ tasks.named<ProcessResources>("processResources") {
     }
 }
 
-version = "${property("mod.version")}+$versionRange-fabric"
+version = "${property("mod.version")}+${property("mod.minecraft")}-fabric"
 base.archivesName = property("mod.id") as String
 
 jsonlang {
@@ -97,24 +87,25 @@ tasks {
 }
 
 java {
-    //withSourcesJar()
     sourceCompatibility = requiredJava
     targetCompatibility = requiredJava
 }
 
 publishMods {
     file = tasks.remapJar.map { it.archiveFile.get() }
-    additionalFiles.from(tasks.remapSourcesJar.map { it.archiveFile.get() })
 
     type = STABLE
-    displayName = "${property("mod.name")} v${property("mod.version")} for $versionRange Fabric"
-    version = "${property("mod.version")}+$versionRange-fabric"
+    displayName = "${property("mod.name")} v${property("mod.version")} for ${property("mod.minecraft")} Fabric"
+    version = "${property("mod.version")}+${property("mod.minecraft")}-fabric"
     changelog = provider { rootProject.file("CHANGELOG.md").readText() }
     modLoaders.add("fabric")
 
     modrinth {
         projectId = property("publish.modrinth") as String
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
-        minecraftVersions.addAll(versions)
+        minecraftVersionRange {
+            start = minVersion
+            end = maxVersion
+        }
     }
 }
