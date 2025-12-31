@@ -2,7 +2,7 @@
 Port of [Delight-map](https://modrinth.com/resourcepack/delight-map) by Enchanted_Games to Minecraft versions older than 1.21.2.
 Please, report all issues while using this mod here, not to the resource pack developer!
 
-Currently supports 1.20.5 to 1.21.1.
+Currently supports 1.14 to 1.21.1. 1.21.2+ will never be supported (use the resource pack instead).
 
 This is a straight port of the shader code from the resource pack to Java with minor changes, this should look identical to the 1.21.2+ resource pack.
 
