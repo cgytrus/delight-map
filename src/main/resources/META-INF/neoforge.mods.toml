@@ -10,7 +10,6 @@ displayName = "Delight-(down)map"
 authors = "ConfiG"
 description = '''
 Port of Delight-map by Enchanted_Games to older Minecraft versions.
-Icon by Enchanted_Games.
 '''
 credits = "Enchanted_Games for making Delight-map."
 logoFile = "assets/icon.png"
